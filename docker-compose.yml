@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: text_app_redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
+  db:
+    image: mysql:8.0.31
+    container_name: test_app_db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    platform: linux/x86_64
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - 3306:3306
+    volumes:
+      - db-data:/var/lib/mysql
+
+  app: &app_base
+    build: .
+    container_name: test_app
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/usr/src/app/:cached
+      - bundle:/usr/local/bundle
+      - rails_cache:/usr/src/app/tmp/cache
+      - node_modules:/usr/src/app/node_modules
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - redis
+    stdin_open: true
+    tty: true
+    environment:
+      DATABASE_HOST: db
+      REDIS_URL: redis://redis:6379
+    links:
+      - db
+
+  sidekiq:
+    <<: *app_base
+    container_name: text_app_sidekiq
+    command: bash -c "bundle exec sidekiq"
+    ports: []
+    cpu_count: 3
+    depends_on:
+      - db
+      - redis
+    links:
+      - redis
+      - db
+
+volumes:
+  bundle:
+  node_modules:
+  rails_cache:
+  db-data:
+    driver: local
+  redis-data:
+    driver: local

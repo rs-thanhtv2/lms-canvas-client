@@ -1,0 +1,108 @@
+<section class="vh-100">
+  <div class="container-fluid h-custom">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-md-9 col-lg-6 col-xl-5">
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp" class="img-fluid"
+          alt="Sample image">
+      </div>
+      <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+      <%= form_for('/auth/signin', method: 'post') do |f| %>
+        <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
+          <p class="lead fw-normal mb-0 me-3">Sign in with</p>
+          <button type="button" class="btn btn-primary">
+            <%= link_to 'Login with Canvas', 'http://canvas.docker/login/oauth2/auth?client_id=5&response_type=code&redirect_uri=https://www.jsdelivr.com/package/npm/bootstrap-login-form' %>
+            <i class="fab fa-facebook-f"></i>
+          </button>
+      
+          <!-- Add buttons for other login options (Twitter, LinkedIn, etc.) if needed -->
+      
+        </div>
+      
+        <div class="divider d-flex align-items-center my-4">
+          <p class="text-center fw-bold mx-3 mb-0">Or</p>
+        </div>
+      
+        <!-- Email input -->
+        <div class="form-outline mb-4">
+          <%= f.email_field 'pseudonym_session[unique_id]', class: 'form-control form-control-lg', placeholder: 'Enter a valid email address', required: true %>
+          <label class="form-label" for="form3Example3">Email address</label>
+        </div>
+      
+        <!-- Password input -->
+        <div class="form-outline mb-3">
+          <%= f.password_field 'pseudonym_session[password]', class: 'form-control form-control-lg', placeholder: 'Enter password', required: true %>
+          <label class="form-label" for="form3Example4">Password</label>
+        </div>
+      
+        <div class="d-flex justify-content-between align-items-center">
+          <!-- Checkbox -->
+          <div class="form-check mb-0">
+            <%= f.check_box 'pseudonym_session[remember_me]', class: 'form-check-input me-2' %>
+            <label class="form-check-label" for="form2Example3">
+              Remember me
+            </label>
+          </div>
+          <%= link_to 'Forgot password?', '#!', class: 'text-body' %>
+        </div>
+      
+        <div class="text-center text-lg-start mt-4 pt-2">
+          <%= f.submit 'Login', class: 'btn btn-primary btn-lg', style: 'padding-left: 2.5rem; padding-right: 2.5rem;' %>
+          <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <%= link_to 'Register', '#!', class: 'link-danger' %></p>
+        </div>
+      <% end %>
+
+      </div>
+    </div>
+  </div>
+  <div class="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
+    <!-- Copyright -->
+    <div class="text-white mb-3 mb-md-0">
+      Copyright © 2020. All rights reserved.
+    </div>
+    <!-- Copyright -->
+
+    <!-- Right -->
+    <div>
+      <a href="#!" class="text-white me-4">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="#!" class="text-white me-4">
+        <i class="fab fa-twitter"></i>
+      </a>
+      <a href="#!" class="text-white me-4">
+        <i class="fab fa-google"></i>
+      </a>
+      <a href="#!" class="text-white">
+        <i class="fab fa-linkedin-in"></i>
+      </a>
+    </div>
+    <!-- Right -->
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-login-form@1.0.0/js/mdb.min.js"></script>
+
+
+<script>
+  async function handleLogin(username, password) {
+
+    const response = await fetch('/login/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
+    });
+
+    const data = await response.json();
+
+    // Lưu access token vào LocalStorage
+    localStorage.setItem('canvas_token', data.access_token); 
+
+    // Thiết lập Authorization header mặc định
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+  }
+</script>
